@@ -132,7 +132,8 @@ celerybeat.pid
 .venv
 env/
 venv/
-venv_data_science/
+
+.venv_ml_ds
 ENV/
 env.bak/
 venv.bak/
