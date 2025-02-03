@@ -14,16 +14,20 @@ from src.logger import logging
 
 from src.utils import save_object
 
+# pylint:disable =pointless-string-statement
 
-@dataclass
+
 # @dataclass decorator: This module provides a decorator and functions for automatically adding generated special methods
 # such as __init__() and __repr__() to user-defined classes.
 # It was originally described in PEP 557.
+@dataclass
 class DataTransformationConfig:
+    "Initials for DataTransformationConfig"
     preprocessor_obj_file_path = os.path.join("artifacts", "preprocessor.pkl")
 
 
 class DataTransformation:
+    "Actual DataTransformers"
     def __init__(
         self,
     ):
@@ -32,8 +36,8 @@ class DataTransformation:
     def get_data_tranformer_object(self):
         """
         This function is responsible for data transformation
+        
         """
-
         try:
             numerical_columns = ["writing_score", "reading_score"]
             categorical_coulmns = [
@@ -57,7 +61,7 @@ class DataTransformation:
                         "imputer",
                         SimpleImputer(strategy="most_frequent"),
                     ),  # most_frquent=mode(most occured)
-                    ("one_hot_encoder", OneHotEncoder()),
+                    ("one_hot_encoder", OneHotEncoder(handle_unknown='ignore')),# Modify your encoder to ignore unknown categories
                     ("scalar", StandardScaler(with_mean=False)), # For normalizing the values in with each other
                 ]
             )
@@ -80,11 +84,11 @@ class DataTransformation:
                         [0.,0.,1.]
                     ]                    
                 """
-            logging.info(f"numerical_pipeline: {numerical_columns}"),
+            logging.info(f"numerical_pipeline: {numerical_columns}")
             logging.info(f"categorical_pipeline: {categorical_coulmns}")
 
             preprocessor = ColumnTransformer(
-                [
+                transformers=[
                     ("numerical_pipeline", numerical_pipeline, numerical_columns),
                     ("categorical_pipeline", categorical_pipeline, categorical_coulmns),
                 ]
@@ -93,9 +97,10 @@ class DataTransformation:
             return preprocessor
 
         except Exception as e:
-            raise CustomException(e, sys)
+            raise CustomException(e, sys) from e
 
     def initiate_data_transformation(self, train_path, test_path):
+        """Initiate data transformation"""
 
         try:
             train_df = pd.read_csv(train_path)
@@ -119,7 +124,7 @@ class DataTransformation:
             target_feature_test_df = test_df[target_column_name]
 
             logging.info(
-                f"Applying preprocessing object on training dataframe and testing dataframe."
+                "Applying preprocessing object on training dataframe and testing dataframe."
             )
 
             """ 
@@ -174,78 +179,71 @@ class DataTransformation:
             
             The np.c_ function in NumPy is a convenient way to concatenate arrays column-wise. It is essentially shorthand for np.column_stack(), which stacks arrays along the second axis (axis=1).
 
-np.c_ converts slice objects (:) into column-wise concatenation.
-It is particularly useful when you want to add a new column to an existing array.
-Your Code:
-python
-Copy
-Edit
-train_array = np.c_[
-    input_feature_train_array, np.array(target_feature_train_df)
-]
-test_array = np.c_[
-    input_feature_test_array, np.array(target_feature_test_df)
-]
-Here, input_feature_train_array contains training features, and target_feature_train_df holds the target values.
-np.c_ is used to concatenate the target_feature_train_df as a new column to the input_feature_train_array, forming a single training array.
-Similarly, test_array is constructed with test features and target values.
-Equivalent Code Using np.column_stack():
-python
-Copy
-Edit
-train_array = np.column_stack(
-    (input_feature_train_array, np.array(target_feature_train_df))
-)
-test_array = np.column_stack(
-    (input_feature_test_array, np.array(target_feature_test_df))
-)
-Both methods produce the same output, but np.c_ is more concise and readable. 🚀
+            np.c_ converts slice objects (:) into column-wise concatenation.
+            It is particularly useful when you want to add a new column to an existing array.
+            Your Code:
+            python
+            Copy
+            Edit
+            train_array = np.c_[
+                input_feature_train_array, np.array(target_feature_train_df)
+            ]
+            test_array = np.c_[
+                input_feature_test_array, np.array(target_feature_test_df)
+            ]
+            Here, input_feature_train_array contains training features, and target_feature_train_df holds the target values.
+            np.c_ is used to concatenate the target_feature_train_df as a new column to the input_feature_train_array, forming a single training array.
+            Similarly, test_array is constructed with test features and target values.
+            Equivalent Code Using np.column_stack():
+            python
+            Copy
+            Edit
+            train_array = np.column_stack(
+                (input_feature_train_array, np.array(target_feature_train_df))
+            )
+            test_array = np.column_stack(
+                (input_feature_test_array, np.array(target_feature_test_df))
+            )
+            Both methods produce the same output, but np.c_ is more concise and readable. 🚀
 
 
+            Here's an example demonstrating the use of np.c_ in Python:
 
 
+            import numpy as np
+
+            # Sample input feature arrays (training and testing)
+            input_feature_train_array = np.array([[1, 2], [3, 4], [5, 6]])
+            input_feature_test_array = np.array([[7, 8], [9, 10]])
+
+            # Sample target feature arrays (training and testing)
+            target_feature_train_df = np.array([10, 20, 30])
+            target_feature_test_df = np.array([40, 50])
+
+            # Using np.c_ to concatenate along columns
+            train_array = np.c_[input_feature_train_array, target_feature_train_df]
+            test_array = np.c_[input_feature_test_array, target_feature_test_df]
+
+            print("Train Array:\n", train_array)
+            print("\nTest Array:\n", test_array)
+
+            Output:
 
 
+            Train Array:
+            [[ 1  2 10]
+            [ 3  4 20]
+            [ 5  6 30]]
 
-
-Here's an example demonstrating the use of np.c_ in Python:
-
-
-
-import numpy as np
-
-# Sample input feature arrays (training and testing)
-input_feature_train_array = np.array([[1, 2], [3, 4], [5, 6]])
-input_feature_test_array = np.array([[7, 8], [9, 10]])
-
-# Sample target feature arrays (training and testing)
-target_feature_train_df = np.array([10, 20, 30])
-target_feature_test_df = np.array([40, 50])
-
-# Using np.c_ to concatenate along columns
-train_array = np.c_[input_feature_train_array, target_feature_train_df]
-test_array = np.c_[input_feature_test_array, target_feature_test_df]
-
-print("Train Array:\n", train_array)
-print("\nTest Array:\n", test_array)
-
-Output:
-
-
-Train Array:
- [[ 1  2 10]
- [ 3  4 20]
- [ 5  6 30]]
-
-Test Array:
- [[ 7  8 40]
- [ 9 10 50]]
- 
-Explanation:
-The input features (input_feature_train_array and input_feature_test_array) each have multiple columns.
-The target values (target_feature_train_df and target_feature_test_df) are added as a new column.
-np.c_ efficiently concatenates them column-wise, forming the final train_array and test_array.
-This is a simple and effective way to merge feature arrays with their corresponding target values! 🚀"""
+            Test Array:
+            [[ 7  8 40]
+            [ 9 10 50]]
+            
+            Explanation:
+            The input features (input_feature_train_array and input_feature_test_array) each have multiple columns.
+            The target values (target_feature_train_df and target_feature_test_df) are added as a new column.
+            np.c_ efficiently concatenates them column-wise, forming the final train_array and test_array.
+            This is a simple and effective way to merge feature arrays with their corresponding target values! 🚀"""
             train_array = np.c_[
                 input_feature_train_array, np.array(target_feature_train_df)
             ]
@@ -253,12 +251,12 @@ This is a simple and effective way to merge feature arrays with their correspond
                 input_feature_test_array, np.array(target_feature_test_df)
             ]
             
-            logging.info(f"Saving preprocessing object.")
+            logging.info("Saving preprocessing object.")
             save_object(
                 file_path=self.data_transformation_config.preprocessor_obj_file_path,
                 obj=preprocessing_obj
             )
-            logging.info(f"Saved preprocessing object.")
+            logging.info("Saved preprocessing object.")
 
             return(
                 train_array,
@@ -268,4 +266,4 @@ This is a simple and effective way to merge feature arrays with their correspond
             
 
         except Exception as e:
-            raise CustomException(e, sys)
+            raise CustomException(e, sys) from e

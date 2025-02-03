@@ -1,9 +1,11 @@
-""" Read data from the cloud, database, internet etc source.
+""" 
+Read data from the cloud, database, internet etc source.
 Includes some inputs that may be required for this Data Ingestion Component:
     1. where I have to the save the training path/data
     2. where I have to save the test data 
     3. where I have to save the raw data
-    All these above can be saved in another class DataIngestionConfig"""
+    All these above can be saved in another class DataIngestionConfig
+"""
 
 import os
 import sys # For custom exception
@@ -24,7 +26,7 @@ from src.components.model_trainer import ModelTrainer
 # @dataclass decorator- Helps in creating all the class variables without having to create '__init__' constructor
 @dataclass
 class DataIngestionConfig:
-    # Saving the files that are the output of the data ingestion in the artifact folder
+    "Saving the files that are the output of the data ingestion in the artifact folder"
     train_data_path: str=os.path.join('artifacts',"train.csv")
     test_data_path: str=os.path.join('artifacts',"test.csv")
     raw_data_path: str=os.path.join('artifacts',"data.csv")
@@ -55,10 +57,10 @@ class DataIngestion:
             return(
                 self.ingestion_config.train_data_path,
                 self.ingestion_config.test_data_path
-
             )
+            
         except Exception as e:
-            raise CustomException(e,sys)
+            raise CustomException(e,sys) from e 
         
 if __name__=="__main__":
     obj=DataIngestion()
